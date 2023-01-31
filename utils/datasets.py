@@ -178,7 +178,7 @@ class LoadImages:  # for inference
                     ret_val, img0 = self.cap.read()
 
             self.frame += 1
-            print(f'video {self.count + 1}/{self.nf} ({self.frame}/{self.nframes}) {path}: ', end='')
+            # print(f'video {self.count + 1}/{self.nf} ({self.frame}/{self.nframes}) {path}: ', end='')
 
         else:
             # Read image
@@ -268,6 +268,7 @@ class LoadStreams:  # multiple IP or RTSP cameras
         self.mode = 'stream'
         self.img_size = img_size
         self.stride = stride
+        self.stopIteration = False
 
         if os.path.isfile(sources):
             with open(sources, 'r') as f:
@@ -291,6 +292,8 @@ class LoadStreams:  # multiple IP or RTSP cameras
             w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
             h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
             self.fps = cap.get(cv2.CAP_PROP_FPS) % 100
+            if not self.fps:
+                self.fps = 20
 
             _, self.imgs[i] = cap.read()  # guarantee first frame
             thread = Thread(target=self.update, args=([i, cap]), daemon=True)
@@ -324,8 +327,7 @@ class LoadStreams:  # multiple IP or RTSP cameras
     def __next__(self):
         self.count += 1
         img0 = self.imgs.copy()
-        if cv2.waitKey(1) == ord('q'):  # q to quit
-            cv2.destroyAllWindows()
+        if self.stopIteration:
             raise StopIteration
 
         # Letterbox
@@ -415,7 +417,7 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
                 x[:, 0] = 0
 
         n = len(shapes)  # number of images
-        bi = np.floor(np.arange(n) / batch_size).astype(int)  # batch index
+        bi = np.floor(np.arange(n) / batch_size).astype(np.int)  # batch index
         nb = bi[-1] + 1  # number of batches
         self.batch = bi  # batch index of image
         self.n = n
@@ -443,7 +445,7 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
                 elif mini > 1:
                     shapes[i] = [1, 1 / mini]
 
-            self.batch_shapes = np.ceil(np.array(shapes) * img_size / stride + pad).astype(int) * stride
+            self.batch_shapes = np.ceil(np.array(shapes) * img_size / stride + pad).astype(np.int) * stride
 
         # Cache images into memory for faster training (WARNING: large datasets may exceed system RAM)
         self.imgs = [None] * n
@@ -1200,7 +1202,7 @@ def pastein(image, labels, sample_labels, sample_images, sample_masks):
                 r_image = cv2.resize(sample_images[sel_ind], (r_w, r_h))
                 temp_crop = image[ymin:ymin+r_h, xmin:xmin+r_w]
                 m_ind = r_mask > 0
-                if m_ind.astype(np.int32).sum() > 60:
+                if m_ind.astype(np.int).sum() > 60:
                     temp_crop[m_ind] = r_image[m_ind]
                     #print(sample_labels[sel_ind])
                     #print(sample_images[sel_ind].shape)

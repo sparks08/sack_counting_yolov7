@@ -1,4 +1,3 @@
-
 import time
 from pathlib import Path
 import cv2
@@ -91,8 +90,8 @@ class YoloV7:
 
 
 
-    def detect(self, uuid="", source="/home/sparkbrains/Downloads/1671804243_1671804343.mp4",
-               timeout=0, idle=120, view_img=False, nosave=True, count=True,
+    def detect(self, uuid="", source="http://197.211.126.24:5080/LiveApp/streams/535687921618306764690790.m3u8",
+               timeout=0, idle=900, view_img=False, nosave=True, count=True,
                intermittent=True, augment=False, conf_thres=0.45, iou_thres=0.80, classes=['sack'], agnostic_nms=False,
                save_conf=False, line_begin=(0, 400), line_end=(1500, 400)):
         if timeout:
@@ -221,7 +220,7 @@ class YoloV7:
                                     w = int(vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
                                     h = int(vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
                                 else:  # stream
-                                    fps, w, h = 10, im0.shape[1], im0.shape[0]
+                                    fps, w, h = 30, im0.shape[1], im0.shape[0]
                                     save_path += '.mp4'
                                 vid_writer = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
                             vid_writer.write(im0)
@@ -266,7 +265,7 @@ class YoloV7:
             print(f"uuid: {uuid}, detection: {count_object.counter}")
 
 
-def aux(uuid="", source="", timeout=60, idle=90,view_img=False, nosave=True, count=True, intermittent=True,
+def aux(uuid="", source="", timeout=0, idle=900, view_img=False, nosave=True, count=True, intermittent=True,
         augment=False, conf_thres=0.45, iou_thres=0.45, classes=[], agnostic_nms=False, save_conf=False,
         line_begin=(0, 400), line_end=(1500, 400)):
     with torch.no_grad():
@@ -280,4 +279,4 @@ def aux(uuid="", source="", timeout=60, idle=90,view_img=False, nosave=True, cou
 if __name__ == '__main__':
     with torch.no_grad():
         model = YoloV7()
-        model.detect("/home/sparkbrains/Downloads/1671804243_1671804343.mp4", nosave=False, count=True, view_img=True)
+        model.detect("http://197.211.126.24:5080/LiveApp/streams/535687921618306764690790.m3u8", nosave=False, count=True)
